@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,14 +29,21 @@ namespace Persistence.Contexts
             {
                 switch (entry.State)
                 {
-                    case EntityState.Modified:
-                        break;
                     case EntityState.Added:
+                        entry.Entity.Created = _dateTime.NowUtc;
                         break;
-                    default:
+                    case EntityState.Modified:
+                        entry.Entity.LastModified = _dateTime.NowUtc;
                         break;
                 }
             }
+
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
     }
 }
